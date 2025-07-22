@@ -17,27 +17,34 @@ class BookController extends Controller
     public function index(Request $request)
     {
         $books = Book::with(['authors', 'categories'])
-            ->when($request->author_id, function ($query) use ($request) {
+            ->when($request->author_name, function ($query) use ($request) {
                 $query->whereHas('authors', function ($q) use ($request) {
-                    $q->where('authors.id', $request->author_id);
+                    $q->where('name', 'LIKE', '%' . $request->author_name . '%');
                 });
             })
-            ->when($request->category_id, function ($query) use ($request) {
+            ->when($request->category_name, function ($query) use ($request) {
                 $query->whereHas('categories', function ($q) use ($request) {
-                    $q->where('categories.id', $request->category_id);
+                    $q->where('name', 'LIKE', '%' . $request->category_name . '%');
                 });
             })
             ->when($request->location, function ($query) use ($request) {
-                $query->where('location', 'LIKE', "%{$request->location}%");
+                $query->where('location', 'LIKE', '%' . $request->location . '%');
             })
             ->get();
-
+        if ($books->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No books found matching the criteria.',
+                'data' => [],
+            ], 404);
+        }
         return response()->json([
             'status' => true,
             'message' => 'Books fetched successfully.',
             'data' => $books,
         ]);
     }
+
 
 
     /**
@@ -58,18 +65,15 @@ class BookController extends Controller
      */
     public function store(BookRequest $request)
     {
-        $book = Book::updateOrCreate(
-            ['id' => $request->id],
-            $request->validated()
-        );
+        $book = Book::create($request->validated());
 
-        $book->authors()->sync($request->author_ids);
-        $book->categories()->sync($request->category_ids);
+        $book->authors()->attach($request->author_ids);
+        $book->categories()->attach($request->category_ids);
 
         return response()->json([
-            'message' => $request->id ? 'Book updated successfully' : 'Book created successfully',
+            'message' => 'Book created successfully',
             'data' => $book->load('authors', 'categories'),
-        ], $request->id ? 200 : 201);
+        ], 201);
     }
 
     /**
@@ -107,7 +111,15 @@ class BookController extends Controller
      */
     public function update(BookRequest $request, Book $book)
     {
-        //update
+        $book->update($request->validated());
+
+        $book->authors()->sync($request->author_ids);
+        $book->categories()->sync($request->category_ids);
+
+        return response()->json([
+            'message' => 'Book updated successfully',
+            'data' => $book->load('authors', 'categories'),
+        ], 200);
     }
 
     /**

@@ -24,13 +24,10 @@ class BookRequest extends FormRequest
      */
     public function rules()
     {
+        $bookId = $this->route('book') ? $this->route('book')->id : null;
 
         return [
-            'name' => [
-                'required',
-                'string',
-                Rule::unique('books', 'name')->ignore($this->id),
-            ],
+            'name' => 'required|string|unique:books,name,' . $bookId,
             'status' => ['required', Rule::in(['Available', 'Booked'])],
             'location' => 'required|string',
             'author_ids' => 'required|array|min:1',
