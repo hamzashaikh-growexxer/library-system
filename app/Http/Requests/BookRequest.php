@@ -36,4 +36,23 @@ class BookRequest extends FormRequest
             'category_ids.*' => 'exists:categories,id',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'Book name is required.',
+            'name.string' => 'Book name must be a string.',
+            'name.unique' => 'Book name already exists.',
+            'status.required' => 'Book status is required.',
+            'status.in' => 'Status must be either Available or Booked.',
+            'location.required' => 'Location is required.',
+            'location.string' => 'Location must be a string.',
+            'author_ids.required' => 'At least one author is required.',
+            'author_ids.array' => 'Author IDs must be an array.',
+            'author_ids.*.exists' => 'Selected author is invalid.',
+            'category_ids.required' => 'At least one category is required.',
+            'category_ids.array' => 'Category IDs must be an array.',
+            'category_ids.*.exists' => 'Selected category is invalid.',
+        ];
+    }
 }
