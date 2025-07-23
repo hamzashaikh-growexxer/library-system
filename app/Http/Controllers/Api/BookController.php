@@ -31,13 +31,6 @@ class BookController extends Controller
                 $query->where('location', 'LIKE', '%' . $request->location . '%');
             })
             ->get();
-        if ($books->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No books found matching the criteria.',
-                'data' => [],
-            ], 404);
-        }
         return response()->json([
             'status' => true,
             'message' => 'Books fetched successfully.',
