@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/document/api', function () {
+    require_once(base_path('public/document/api.php'));
+});
